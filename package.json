@@ -1,0 +1,44 @@
+{
+  "name": "notegist",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "moment": "^2.20.1",
+    "react": "16.2.0",
+    "react-native": "0.51.0",
+    "react-native-easy-markdown": "^1.1.9",
+    "react-native-keyboard-spacer": "^0.4.1",
+    "react-native-linear-gradient": "^2.4.0",
+    "react-native-oauth": "https://github.com/exentrich/react-native-oauth.git",
+    "react-native-simple-markdown": "^1.1.0",
+    "react-native-swipeout": "^2.3.3",
+    "react-native-syntax-highlighter": "^2.0.0",
+    "react-native-vector-icons": "^4.5.0",
+    "react-navigation": "^1.0.0-beta.27",
+    "react-redux": "^5.0.6",
+    "redux": "^3.7.2",
+    "redux-devtools-extension": "^2.13.2",
+    "redux-thunk": "^2.2.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.1",
+    "babel-jest": "22.1.0",
+    "babel-preset-react-native": "4.0.0",
+    "eslint": "^4.16.0",
+    "eslint-config-fbjs": "^2.0.1",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-flowtype": "^2.42.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.6.0",
+    "eslint-plugin-relay": "0.0.20",
+    "jest": "22.1.4",
+    "react-test-renderer": "16.2.0"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}

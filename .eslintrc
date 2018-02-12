@@ -1,0 +1,22 @@
+{
+    "extends": "fbjs",
+    "rules": {
+        "indent": ["error", 4]
+    },
+    "root": true,
+    "plugins": [
+        "react",
+        "flowtype"
+    ],
+    "settings": {
+        "flowtype": {
+            "onlyFilesWithFlowAnnotation": true
+        }
+    },
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true
+        }
+    }
+}

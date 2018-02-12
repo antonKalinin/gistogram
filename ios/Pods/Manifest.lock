@@ -1,0 +1,21 @@
+PODS:
+  - DCTAuth (3.0)
+
+DEPENDENCIES:
+  - DCTAuth (from `https://github.com/danielctull/DCTAuth.git`)
+
+EXTERNAL SOURCES:
+  DCTAuth:
+    :git: https://github.com/danielctull/DCTAuth.git
+
+CHECKOUT OPTIONS:
+  DCTAuth:
+    :commit: 0a8091a3fc165fb99a6f70cf15b3aed25252dad9
+    :git: https://github.com/danielctull/DCTAuth.git
+
+SPEC CHECKSUMS:
+  DCTAuth: 8add154decd00335d62917828896bba790ce47fd
+
+PODFILE CHECKSUM: 501b7437439b74ec349bf14179dbca38d8f03c5a
+
+COCOAPODS: 1.4.0
