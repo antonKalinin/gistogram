@@ -10,6 +10,7 @@ import {
 } from 'react-navigation';
 
 import {connect} from 'react-redux';
+import {createReduxBoundAddListener} from 'react-navigation-redux-helpers';
 
 import Drawer from './components/Drawer';
 
@@ -25,27 +26,22 @@ const StackNavigation = StackNavigator({
     GistList: {screen: GistList},
 });
 
-export const resetAction = (nav: any, routeName: string, params: any) => {
-    const actions = nav.routes.map(route => NavigationActions.navigate(route));
-    const index = actions.length - 1;
-
-    actions[index] = NavigationActions.navigate({routeName, params});
-
-    return NavigationActions.reset({index, actions});
-};
-
-export const AppNavigation = DrawerNavigator({
-    Stack: {screen: StackNavigation},
-}, {
-    drawerWidth: width / 2,
-    drawerPosition: 'right',
-    contentComponent: Drawer,
-});
+export const AppNavigation = DrawerNavigator(
+    {
+        Stack: {screen: StackNavigation},
+    },
+    {
+        drawerWidth: width / 2,
+        drawerPosition: 'right',
+        contentComponent: Drawer,
+    }
+);
 
 class Navigation extends Component {
     constructor(props) {
         super(props);
 
+        this.addListener = createReduxBoundAddListener('root');
         this.onBackPress = this.onBackPress.bind(this);
     }
 
@@ -74,6 +70,7 @@ class Navigation extends Component {
         const navigation = addNavigationHelpers({
             dispatch,
             state: nav,
+            addListener: this.addListener,
         });
 
         return <AppNavigation navigation={navigation} />;

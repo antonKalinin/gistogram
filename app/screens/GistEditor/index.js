@@ -2,13 +2,8 @@
  * @flow
  */
 
-import React, { Component } from 'react';
-import {
-    Text,
-    View,
-    TextInput,
-    TouchableOpacity,
-} from 'react-native';
+import React, {Component} from 'react';
+import {Text, View, TextInput, TouchableOpacity} from 'react-native';
 
 import {connect} from 'react-redux';
 import GhIcon from 'react-native-vector-icons/Octicons';
@@ -20,23 +15,21 @@ import GradientContainer from '../../components/GradientContainer';
 
 import {NavigationActions} from 'react-navigation';
 
-import {
-    editGist,
-    fetchGist,
-    createGist,
-    addNotification,
-    removeNotification,
-} from '../../actions';
+import {addNotification, removeNotification} from '../../actions';
 
 import styles from './styles';
 
-const resetAction = NavigationActions.reset({
-    index: 1,
-    actions: [
-        NavigationActions.navigate({ routeName: 'GistList' }),
-        NavigationActions.navigate({ routeName: 'Gist' }),
-    ],
-});
+const getPreviousRoute = navState => {
+    const routesStack =
+        (navState.routes &&
+            navState.routes[0] &&
+            navState.routes[0].routes &&
+            navState.routes[0].routes[0] &&
+            navState.routes[0].routes[0].routes) ||
+        [];
+
+    return routesStack[routesStack.length - 2];
+};
 
 class GistEditor extends Component {
     static navigationOptions = {
@@ -63,11 +56,11 @@ class GistEditor extends Component {
     }
 
     componentDidMount() {
-        const {dispatch, navigation, gist, editingMode} = this.props;
+        const {fetchGist, navigation, gist, editingMode} = this.props;
         const {id: gistId} = navigation.state.params || {id: null};
 
         if (editingMode && gistId && (!gist || (gist && gist.id !== gistId))) {
-            dispatch(fetchGist(gistId));
+            fetchGist(gist.id);
         }
     }
 
@@ -82,7 +75,10 @@ class GistEditor extends Component {
         };
 
         if (nextProps.editingMode && nextProps.gist) {
-            const gistFile = nextProps.gist && nextProps.gist.files && Object.values(nextProps.gist.files)[0];
+            const gistFile =
+                nextProps.gist &&
+                nextProps.gist.files &&
+                Object.values(nextProps.gist.files)[0];
 
             nextState.isPublic = nextProps.gist.public;
             nextState.content = gistFile ? gistFile.content : '';
@@ -90,8 +86,9 @@ class GistEditor extends Component {
             nextState.description = nextProps.gist.description;
         }
 
-        const needUpdate = !gist && nextProps.gist ||
-            nextProps.gist && gist && nextProps.gist.id !== gist.id ||
+        const needUpdate =
+            (!gist && nextProps.gist) ||
+            (nextProps.gist && gist && nextProps.gist.id !== gist.id) ||
             editingMode !== nextProps.editingMode;
 
         needUpdate && this.setState(nextState);
@@ -102,14 +99,11 @@ class GistEditor extends Component {
     }
 
     _getData() {
-        const {dispatch} = this.props;
         let {isPublic, content, filename, description} = this.state;
 
-        [
-            content,
-            filename,
-            description,
-        ] = [content, filename, description].map(str => str.trim());
+        [content, filename, description] = [content, filename, description].map(
+            str => str.trim()
+        );
 
         if (!filename || !content || !description) {
             let message = 'Please, add ';
@@ -122,7 +116,7 @@ class GistEditor extends Component {
                 message += 'description';
             }
 
-            dispatch(addNotification(message));
+            this.props.addNotification(message);
 
             return null;
         }
@@ -139,7 +133,16 @@ class GistEditor extends Component {
     }
 
     _saveGist() {
-        const {gist, editingMode, dispatch, navigation} = this.props;
+        const {
+            gist,
+            navigation,
+            prevRoute,
+            editingMode,
+            editGist,
+            createGist,
+            addNotification,
+            removeNotification,
+        } = this.props;
         const {isSaving} = this.state;
         const data = this._getData();
 
@@ -150,48 +153,56 @@ class GistEditor extends Component {
         if (data) {
             this.setState({isSaving: true});
 
-            dispatch(addNotification({text: 'Saving...', duration: 10000}));
+            addNotification({text: 'Saving...', duration: 10000});
 
-            const saving = editingMode && gist && gist.id
-                ? dispatch(editGist(gist.id, data))
-                : dispatch(createGist(data));
+            const saving =
+                editingMode && gist && gist.id
+                    ? editGist(gist.id, data)
+                    : createGist(data);
 
             saving.then(() => {
                 this.setState({isSaving: false});
-                dispatch(removeNotification());
+                removeNotification();
 
-                navigation.dispatch(resetAction);
+                if (prevRoute && prevRoute.routeName === 'Gist') {
+                    navigation.pop();
+                } else {
+                    navigation.replace('Gist');
+                }
             });
         }
     }
 
     render() {
         const {navigation, isFetching} = this.props;
-        const {
-            isPublic,
-            content,
-            filename,
-            description,
-        } = this.state;
+        const {isPublic, content, filename, description} = this.state;
 
         return (
             <GradientContainer>
                 {isFetching && <Loading />}
-                {!isFetching &&
+                {!isFetching && (
                     <View style={{flex: 1}}>
                         <View style={styles.header}>
                             <View style={styles.headerControls}>
                                 <TouchableOpacity
-                                    onPress={() => { navigation.goBack(); }}
+                                    onPress={() => {
+                                        navigation.goBack();
+                                    }}
                                     style={styles.headerButton}
                                 >
-                                    <MdIcon name="arrow-back" size={30} color="#FFF" />
+                                    <MdIcon
+                                        name="arrow-back"
+                                        size={30}
+                                        color="#FFF"
+                                    />
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={this._saveGist}
                                     style={styles.headerButton}
                                 >
-                                    <Text style={styles.headerButtonText}>SAVE</Text>
+                                    <Text style={styles.headerButtonText}>
+                                        SAVE
+                                    </Text>
                                 </TouchableOpacity>
                             </View>
                             <TextInput
@@ -199,10 +210,12 @@ class GistEditor extends Component {
                                 style={styles.title}
                                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                                 placeholder="Gist description"
-                                onChangeText={(description) => {
+                                onChangeText={description => {
                                     this.setState({
                                         description,
-                                        filename: `${description.replace(/\s/g, '_').toLowerCase()}.md`,
+                                        filename: `${description
+                                            .replace(/\s/g, '_')
+                                            .toLowerCase()}.md`,
                                     });
                                 }}
                             />
@@ -214,7 +227,8 @@ class GistEditor extends Component {
                                     <GhIcon
                                         style={styles.secretIcon}
                                         name={isPublic ? 'eye' : 'lock'}
-                                        size={16} color="#FFF"
+                                        size={16}
+                                        color="#FFF"
                                     />
                                     <Text style={styles.visibilityButtonText}>
                                         {isPublic ? 'Public' : 'Secret'}
@@ -226,27 +240,65 @@ class GistEditor extends Component {
                                     style={styles.filename}
                                     placeholderTextColor="rgba(8, 17, 45, 0.35)"
                                     placeholder="Filename.md"
-                                    onChangeText={(filename) => { this.setState({filename}); }}
+                                    onChangeText={filename => {
+                                        this.setState({filename});
+                                    }}
                                 />
                             </View>
                         </View>
                         <View style={styles.form}>
                             <MarkdownEditor
                                 value={content}
-                                onChangeText={(content) => { this.setState({content}); }}
+                                onChangeText={content => {
+                                    this.setState({content});
+                                }}
                             />
                         </View>
                     </View>
-                }
+                )}
             </GradientContainer>
         );
     }
 }
 
-export default connect(state => ({
-    gist: state.gists.current,
-    isFetching: state.gists.isFetching,
-    editingMode: state.gists.editingMode,
-}))(GistEditor);
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        editGist: (id, data) =>
+            new Promise((resolve, reject) => {
+                dispatch({
+                    type: 'GIST_EDIT_REQUESTED',
+                    payload: {
+                        id,
+                        data,
+                        resolve,
+                        reject,
+                    },
+                });
+            }),
+        fetchGist: id =>
+            dispatch({type: 'GIST_FETCH_REQUESTED', payload: {id}}),
+        createGist: data =>
+            new Promise((resolve, reject) => {
+                dispatch({
+                    type: 'GIST_CREATE_REQUESTED',
+                    payload: {
+                        data,
+                        resolve,
+                        reject,
+                    },
+                });
+            }),
+        addNotification: message => dispatch(addNotification(message)),
+        removeNotification: () => dispatch(removeNotification()),
+    };
+};
 
-
+export default connect(
+    state => ({
+        gist: state.gists.current,
+        isFetching: state.gists.isFetching,
+        editingMode: state.gists.editingMode,
+        prevRoute: getPreviousRoute(state.nav),
+    }),
+    mapDispatchToProps
+)(GistEditor);

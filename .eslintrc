@@ -1,7 +1,7 @@
 {
     "extends": "fbjs",
     "rules": {
-        "indent": ["error", 4]
+        "indent": ["error", 4, {"SwitchCase": 1}]
     },
     "root": true,
     "plugins": [

@@ -1,3 +1,4 @@
 {
-  "presets": ["react-native"]
+  "presets": ["env", "react", "react-native"],
+  "plugins": ["react-native-web"]
 }

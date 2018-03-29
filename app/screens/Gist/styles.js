@@ -1,5 +1,7 @@
 import {StyleSheet, Dimensions} from 'react-native';
 
+const {width} = Dimensions.get('window');
+
 export default StyleSheet.create({
     header: {
         marginTop: 10,
@@ -18,13 +20,18 @@ export default StyleSheet.create({
         fontWeight: '700',
     },
     content: {
-        paddingTop: 20,
-        paddingHorizontal: 20,
+        flex: 1,
         backgroundColor: '#fff',
+    },
+    markdown: {
+        flex: 1,
     },
     info: {
         marginHorizontal: 10,
         marginBottom: 15,
+    },
+    text: {
+        padding: 20,
     },
     title: {
         fontSize: 34,

@@ -1,18 +1,13 @@
 import React, {Component} from 'react';
-import {
-    View,
-    TextInput,
-    StyleSheet,
-    TouchableOpacity,
-} from 'react-native';
+import {View, TextInput, StyleSheet, TouchableOpacity} from 'react-native';
 
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 import MdIcon from 'react-native-vector-icons/MaterialIcons';
 
-import markitdown from './markitdown';
+import markeddown from './markeddown';
 
 const styles = StyleSheet.create({
-    container: { flex: 1 },
+    container: {flex: 1},
     toolbar: {
         flexDirection: 'row',
         justifyContent: 'center',
@@ -44,16 +39,16 @@ const styles = StyleSheet.create({
 });
 
 const buttons = [
-    { name: 'heading2', icon: 'format-size' },
-    { name: 'bold', icon: 'format-bold' },
-    { name: 'italic', icon: 'format-italic' },
-    { name: 'spacer1' },
-    { name: 'quote', icon: 'format-quote' },
-    { name: 'link', icon: 'link' },
-    { name: 'spacer2' },
-    { name: 'bulleted-list', icon: 'format-list-bulleted' },
-    { name: 'numbered-list', icon: 'format-list-numbered' },
-    { name: 'check-list', icon: 'check-box' },
+    {name: 'heading2', icon: 'format-size'},
+    {name: 'bold', icon: 'format-bold'},
+    {name: 'italic', icon: 'format-italic'},
+    {name: 'spacer1'},
+    {name: 'quote', icon: 'format-quote'},
+    {name: 'link', icon: 'link'},
+    {name: 'spacer2'},
+    {name: 'bulletedList', icon: 'format-list-bulleted'},
+    {name: 'orderedList', icon: 'format-list-numbered'},
+    {name: 'tasklist', icon: 'check-box'},
 ];
 
 export default class MarkdownEditor extends Component {
@@ -73,7 +68,7 @@ export default class MarkdownEditor extends Component {
     _applyMarkdown(name) {
         const {value, selection} = this.state;
 
-        this.setState({value: markitdown(value, name, selection)});
+        this._onChangeText(markeddown(value, name, selection));
     }
 
     _onChangeText(value) {
@@ -92,14 +87,19 @@ export default class MarkdownEditor extends Component {
 
     _renderButton(button, index) {
         if (button.name.indexOf('spacer') === 0) {
-            return (<View key={button.name} style={styles.toolbarSpacer}></View>);
+            return <View key={button.name} style={styles.toolbarSpacer} />;
         }
 
         return (
             <TouchableOpacity
                 key={button.name}
-                onPress={() => { this._applyMarkdown(button.name); }}
-                style={[styles.toolbarButton, index === 0 && styles.toolbarButton_first]}
+                onPress={() => {
+                    this._applyMarkdown(button.name);
+                }}
+                style={[
+                    styles.toolbarButton,
+                    index === 0 && styles.toolbarButton_first,
+                ]}
             >
                 <MdIcon name={button.icon} size={20} color="#777" />
             </TouchableOpacity>
@@ -114,14 +114,17 @@ export default class MarkdownEditor extends Component {
                 <TextInput
                     multiline
                     autoFocus
-                    value={value}
+                    key="markidown"
+                    autoCorrect={false}
+                    keyboardType="default"
+                    defaultValue={value}
                     style={styles.textInput}
                     placeholder="Gist content"
                     onChangeText={this._onChangeText}
                     onSelectionChange={this._onSelectionChange}
                 />
                 <View style={styles.toolbar}>
-                    { buttons.map(this._renderButton) }
+                    {buttons.map(this._renderButton)}
                 </View>
                 <KeyboardSpacer />
             </View>

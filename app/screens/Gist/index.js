@@ -2,18 +2,14 @@
  * @flow
  */
 
-import React, { Component } from 'react';
-import {
-    Text,
-    View,
-    ScrollView,
-    TouchableOpacity,
-} from 'react-native';
+import React, {Component} from 'react';
+import {Text, View, WebView, TouchableOpacity} from 'react-native';
 
 import {connect} from 'react-redux';
 import Markdown from 'react-native-easy-markdown';
 import GhIcon from 'react-native-vector-icons/Octicons';
 import MdIcon from 'react-native-vector-icons/MaterialIcons';
+import marked from 'marked';
 import Moment from 'moment';
 
 import {toggleEditingMode} from '../../actions';
@@ -22,6 +18,25 @@ import GradientContainer from '../../components/GradientContainer';
 
 import styles from './styles';
 
+const htmlWrap = html =>
+    `
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css" />
+            <style>
+                html, body {
+                    height: 100%;
+                    padding: 5px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="markdown-body">${html}</div>
+        </body>
+    </html>
+    `;
 
 class Gist extends Component {
     static navigationOptions = {
@@ -34,10 +49,13 @@ class Gist extends Component {
         this._editGist = this._editGist.bind(this);
     }
 
-    componentDidMount() {
-        const {dispatch, navigation, gist} = this.props;
-        const {gist: nextGist} = navigation.state.params || {gist: {}};
-    }
+    /* componentWillReceiveProps(nextProps) {
+        const {gist} = this.state;
+
+        if (nextProps.gist !== gist) {
+            this.setState({gist: nextProps.gist});
+        }
+    } */
 
     _editGist() {
         const {dispatch, navigation} = this.props;
@@ -47,34 +65,30 @@ class Gist extends Component {
 
     _renderMarkdown(markdown, key) {
         return (
-            <Markdown key={key}>
-                {markdown.trim().replace(/\n/g, '\n\n')}
-            </Markdown>
+            <WebView
+                key={key}
+                style={{}}
+                scalesPageToFit={false}
+                source={{
+                    html: htmlWrap(
+                        marked(markdown.trim().replace(/\n/g, '\n\n'))
+                    ),
+                }}
+            />
         );
     }
 
-    /*_renderSyntax(file, key) {
-        return (
-            <SyntaxHighlighter
-                key={key}
-                language={file.language}
-                style={github}
-                highlighter="hljs"
-            >
-                {file.content}
-            </SyntaxHighlighter>
-        );
-    }*/
-
     render() {
-        const {gist, navigation} = this.props;
+        const {navigation, gist} = this.props;
 
         return (
             <GradientContainer>
                 <View style={styles.header}>
                     <View style={styles.headerControls}>
                         <TouchableOpacity
-                            onPress={() => { navigation.goBack(); }}
+                            onPress={() => {
+                                navigation.goBack();
+                            }}
                             style={styles.headerButton}
                         >
                             <MdIcon name="arrow-back" size={30} color="#FFF" />
@@ -86,43 +100,50 @@ class Gist extends Component {
                             <Text style={styles.headerButtonText}>EDIT</Text>
                         </TouchableOpacity>
                     </View>
-                    {gist &&
+                    {gist && (
                         <View style={styles.info}>
-                            <Text style={styles.title}>
-                                {gist.description}
-                            </Text>
+                            <Text style={styles.title}>{gist.description}</Text>
                             <View style={styles.attributes}>
                                 <Text style={styles.date}>
-                                    {Moment(gist.created_at).format('DD MMMM, YYYY')}
+                                    {Moment(gist.created_at).format(
+                                        'DD MMMM, YYYY'
+                                    )}
                                 </Text>
-                                {gist.public === false &&
+                                {gist.public === false && (
                                     <GhIcon
                                         style={styles.secretIcon}
-                                        name="lock" size={16} color="#FFF"
+                                        name="lock"
+                                        size={16}
+                                        color="#FFF"
                                     />
-                                }
+                                )}
                                 <Text style={styles.secret}>
                                     {gist.public ? 'Public' : 'Secret'}
                                 </Text>
                             </View>
                         </View>
-                    }
+                    )}
                 </View>
-                {gist &&
-                    <ScrollView style={styles.content}>
-                        {
-                            Object.keys(gist.files).map((fileName) => {
-                                const file = gist.files[fileName];
+                {gist && (
+                    <View style={styles.content}>
+                        {Object.keys(gist.files).map(fileName => {
+                            const file = gist.files[fileName];
 
-                                if (file && file.language === 'Markdown') {
-                                    return this._renderMarkdown(file.content, gist.id);
-                                }
+                            if (file && file.language === 'Markdown') {
+                                return this._renderMarkdown(
+                                    file.content,
+                                    gist.id
+                                );
+                            }
 
-                                return <Text>{file.content}</Text>; // this._renderSyntax(file, gist.id);
-                            })
-                        }
-                    </ScrollView>
-                }
+                            return (
+                                <Text key={file.filename} style={styles.text}>
+                                    {file.content}
+                                </Text>
+                            );
+                        })}
+                    </View>
+                )}
                 {!gist && <Loading />}
             </GradientContainer>
         );
@@ -132,5 +153,3 @@ class Gist extends Component {
 export default connect(state => ({
     gist: state.gists.current,
 }))(Gist);
-
-

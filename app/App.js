@@ -2,20 +2,12 @@
  * @flow
  */
 
-import React, { Component } from 'react';
-import {
-    View,
-    StatusBar,
-} from 'react-native';
+import React, {Component} from 'react';
+import {View, StatusBar} from 'react-native';
 
 import {connect} from 'react-redux';
 
-import {
-    fetchUser,
-    fetchUserGists,
-    fetchAccessToken,
-    fetchFilter,
-} from './actions';
+import {fetchUser, fetchAccessToken, fetchFilter} from './actions';
 
 import API from './API';
 import Welcome from './screens/Welcome';
@@ -30,7 +22,7 @@ class App extends Component<{}> {
             checkingAuthorization: true,
         };
 
-        API.errorHandler = (error) => {
+        API.errorHandler = error => {
             /*props.dispatch(addAlert({
                 level: 'error',
                 title: `Server error (${error.statusCode.toString()})`,
@@ -48,7 +40,7 @@ class App extends Component<{}> {
             .then(() => {
                 this.setState({checkingAuthorization: false});
             })
-            .catch((error) => {
+            .catch(error => {
                 this.setState({checkingAuthorization: false});
                 console.log('Need to authorize');
             });
@@ -63,7 +55,10 @@ class App extends Component<{}> {
 
         if (nextProps.user) {
             dispatch(fetchFilter()).then(() => {
-                dispatch(fetchUserGists(nextProps.user.login));
+                dispatch({
+                    type: 'GIST_LIST_FETCH_REQUESTED',
+                    payload: {userName: nextProps.user.login},
+                });
             });
         }
     }
